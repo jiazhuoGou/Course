@@ -20,7 +20,7 @@ public class JMenuDemo extends JMenuBar {
 
 
     //定义“算法”菜单
-    private JMenu createAlgoMenu()
+    public JMenu createAlgoMenu()
     {
         JMenu menu=new JMenu("算法");
         menu.setMnemonic(KeyEvent.VK_F);    //设置快速访问符

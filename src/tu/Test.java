@@ -24,11 +24,12 @@ public class Test {
         System.out.println("边集合 : " + data);
 
         Graph g = new Graph(data, size, size2, vertex);
+        g.maximumMatching();
 
         // 最小生成树
-        g.prim();
+        //g.prim();
 
-        // 最短路径
+        /* 最短路径
         Scanner sc2 = new Scanner(System.in);
         boolean flag = true;
         while (flag){
@@ -43,7 +44,7 @@ public class Test {
                 System.out.println("源点是 " + src);
                 g.dijstra(src);
             }
-        }
+        }*/
 
 
 

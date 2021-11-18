@@ -16,6 +16,11 @@ public class Graph {
     public  static int MAX = 99;
     public char[][] parent;  // 最小生成树的
     public char[][] parentDij; // 最短路径的
+    public int uN, vN;      // 二部图的各部分数量
+    public int[] link;      // 二部图的边关系
+    // 边的关系，联系起来及link[v] = u，存储的是下标
+    public boolean[] used; // 二部图
+    public int[][] newEdge;    // 二部图新矩阵
 
     public Graph() {}
 
@@ -26,6 +31,7 @@ public class Graph {
      * vertex : 顶点集合
      * */
     public Graph(List<String> data, int size, int size2, String vertex) {
+        System.out.println("----------初始化图-----------");
         this.vertex = vertex.toCharArray();
         System.out.println("顶点集合 " + Arrays.toString(this.vertex));
         this.sizeVertex = size;
@@ -43,12 +49,15 @@ public class Graph {
             }
         } // size2是边数
         String str;
-        for (int i = 0; i < size2; i++) {
+        for (int i = 0; i < size2; i++) { // 这里要注意权重是双数的时候，需要截取字串
             str = data.get(i);
+            String tmpStr = str.substring(2); // 截取后面的数字
+            tmpStr = tmpStr.replace(" ", ""); // 要清除掉空格
             char[] c = str.toCharArray();
             int m = vertex.indexOf(c[0]);
             int n = vertex.indexOf(c[1]);
-            edge[m][n] = c[2] - '0';
+            edge[m][n] = Integer.parseInt(tmpStr);
+            System.out.println(edge[m][n]);
             edge[n][m] = edge[m][n];
             // vertex.indexOf(str[0]);
         }
@@ -57,6 +66,33 @@ public class Graph {
         for (int i = 0; i < sizeVertex; i++) visited[i] = 1; // 代表未被访问
         System.out.println("访问数组 " + Arrays.toString(visited));
         show(edge, size);
+        // 二部图
+        link = new int[sizeVertex];
+        used = new boolean[sizeVertex];
+        Arrays.fill(link, -1);  // 初始化二部图关系表
+        int cnt = 0;
+        for (int i = 0; i < sizeVertex; i++) { // 找出二部图的v,u
+            if (edge[i][0] == 0 || edge[i][0] == 99 ) {
+                cnt++;
+            }
+            if (cnt > 0 && (edge[i][0] < 99 && edge[i][0] > 0)) { // 说明到了下部分了
+                break;
+            }
+        }
+        uN = cnt;   // 上部分,即指代n
+        vN = sizeVertex - uN;   // 下部分,即m
+        // 要对邻接矩阵做改变 ，只保留右上角的矩阵
+        System.out.println("上部分人数: " + uN + " 下部分人数 : " + vN);
+        // 行代表上部分，列代表下部分
+        newEdge = new int[uN][vN];
+        for (int i = 0; i < uN; i++) {
+            for (int j = 0; j < vN; j++) {
+                newEdge[i][j] = edge[i][j+uN];
+            }
+        }
+        System.out.println("二部图新的关系矩阵 " );
+        show(newEdge, uN);
+
     }
 
     public void show(int[][] arr, int size) {
@@ -71,8 +107,17 @@ public class Graph {
         }
     }
 
+    public static void show(String[] arr) {
+        for (String str : arr) {
+            System.out.print(str + "  ");
+        }
+        System.out.println();
+    }
+
     // currVex顶点数 currArc边数
     public void prim() {
+        System.out.println();
+        System.out.println("---------最小生成树算法--------");
         int[][] Min = new int[2][sizeVertex]; // Min第一行寸的是该点父亲的下标，节点与下标映射
         int MST = 0; // 树的最小权值和
         for (int i = 0; i < sizeVertex; i++) {
@@ -122,6 +167,8 @@ public class Graph {
 
     // 输入起点，它会打印对图中所有点的路劲
     public void dijstra(char src) {
+        System.out.println();
+        System.out.println("-----------最短路径算法--------------");
         int[] shortest = new int[sizeVertex]; // 记录到某点的最短路径长度
         int[] visited = new int[sizeVertex]; // 记录该点是否被访问
         String[] path = new String[sizeVertex]; // 存储输出路径
@@ -149,7 +196,6 @@ public class Graph {
 
         shortest[vertextStr.indexOf(src)] = 0; // 它到自己的距离是0
         visited[vertextStr.indexOf(src)] = 1; // 一来就访问
-
 
         for (int i = 1; i < sizeVertex; i++) {
             int min = MAX;
@@ -201,7 +247,39 @@ public class Graph {
             }
         }
         System.out.println();
+    }
 
+    public int maximumMatching() {
+        System.out.println();
+        System.out.println("-----------最大匹配算法--------------");
+        // 男上女下
+        int res = 0; // 最大匹配数
+        for (int u = 0; u < uN; u++) {
+            // 初始化，对某个男生来说，他们可能都名花无主
+            Arrays.fill(used, false);
+            if (find(u)) {
+                res++; // 配对了就+1
+            }
+        }
+        System.out.println("最大匹配的值 : " + res);
+        System.out.println("最大匹配方案 : ");
+        System.out.println(Arrays.toString(link));
+        return res;
+    }
+
+    // 都是用下标存储
+    public boolean find(int u) {
+        System.out.println("发现的上部分是什么 + " + u);
+        for (int i = 0; i < vN; i++) { // 遍历下部分点
+            if ((newEdge[u][i] > 0 && newEdge[u][i] < 99) && !used[i]) { // 有关系但是名花无主
+                used[i] = true; // 那就让他名花有主
+                if (link[i] == -1 || find(link[i])){// 递归
+                    link[i] = u;// 保存与该女生配对的男生下标
+                    return true;// 配对成功
+                } // 如果女生没有配对或者跟女生配对的男生可以腾位置，那ok
+            }
+        }
+        return false; // 不然配对失败
     }
 
 }

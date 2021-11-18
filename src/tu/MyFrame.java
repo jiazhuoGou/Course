@@ -1,31 +1,38 @@
 package tu;
 
 import javafx.scene.control.cell.ProgressBarTreeTableCell;
+import jdk.internal.org.objectweb.asm.Handle;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 public class MyFrame extends JFrame {
 
     private final Font font=new Font("宋体", Font.BOLD,15);
     public JLabel verLabel = new JLabel("顶点数", JLabel.CENTER);
     public JLabel edgeLabel = new JLabel("边数", JLabel.CENTER);
+    public JLabel vertexsLabel = new JLabel("顶点集合", JLabel.CENTER);
+    public JLabel edgeDataLabel = new JLabel("关系集合", JLabel.CENTER);
+    public JLabel resultLabel = new JLabel("结果", JLabel.CENTER);
+    public JTextArea resultArea = new JTextArea();
+    public JTextField vertexsTextFiled = new JTextField();
     public JTextField verTextField = new JTextField();
     public JTextField edgeTextField = new JTextField();
     public JButton btnStart = new JButton("开始");
     public JTextArea edgeDataArea = new JTextArea();
     public JPanel root = new MyPane();
-    public JScrollPane jScrollPane = null;
     public JFrame jFrame = new JFrame("图论");
 
-    public static String strVerNum;
-    public static String strEdgeNum;
-    public static String strEdgeData;
-    public static boolean START = false;
+    public static volatile String strVerNum;        // 点数
+    public static volatile String strEdgeNum;       // 边数
+    public static volatile String strVertexs;           // 顶点集合
+    public static volatile String strEdgeData;      // 关系集合
+    public static volatile boolean START = false;   // 开始标志
+    public static volatile int algoType;            // 算法标志，1最小生成树,2最短路径,3最大匹配
+
 
     public MyFrame() {
 
@@ -47,29 +54,51 @@ public class MyFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("顶点数 : " + e.getActionCommand());   // 从文本框中获取的顶点数字符串
-                strVerNum = e.getActionCommand();           // 用全局变量去接
+                strVerNum = new String(e.getActionCommand());
             }
         });
         edgeTextField.addActionListener(new ActionListener() {  // 设置监听事件获取输入的内容
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("边数 : " + e.getActionCommand());   // 从文本框中获取的顶点数字符串
-                strEdgeNum = e.getActionCommand();           // 用全局变量去接
+                strEdgeNum = new String(e.getActionCommand());           // 用全局变量去接
+            }
+        });
+
+        // 设置顶点集合
+        vertexsLabel.setFont(font);
+        vertexsLabel.setBounds(790, 70, 80, 80);
+        vertexsLabel.setVerticalTextPosition(JLabel.TOP);
+        vertexsTextFiled.setBounds(740, 120, 170, 20);
+        vertexsTextFiled.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                strVertexs = new String(e.getActionCommand());
+                System.out.println("顶点集合 : " + strVertexs);
             }
         });
 
         // 设置顶点与边的关系
+        edgeDataLabel.setFont(font);
+        edgeDataLabel.setVerticalTextPosition(JLabel.TOP);
+        edgeDataLabel.setBounds(790, 140, 80, 80);
         edgeDataArea.setLineWrap(true); // 自动换行
         Dimension size = edgeDataArea.getPreferredSize();
-        edgeDataArea.setBounds(740,100, 150, 80);
-        /*
-        edgeDataArea.addActionListener(new ActionListener() {
+        edgeDataArea.setBounds(740,190, 170, 80);
+        edgeDataArea.addInputMethodListener(new InputMethodListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                strEdgeData = e.getActionCommand();
-                System.out.println("具体图的关系 : " + strEdgeData);
-            }
-        });*/
+            public void inputMethodTextChanged(InputMethodEvent event) {
+                System.out.println("文本域的变化 " + event.getText());}
+            @Override
+            public void caretPositionChanged(InputMethodEvent event) {}
+        });
+
+        // 设置结果展示
+        resultLabel.setFont(font);
+        resultLabel.setVerticalTextPosition(JLabel.TOP);
+        resultLabel.setBounds(30, 0, 80, 80);
+        resultArea.setBounds(50, 50, 300, 150);
+        resultArea.setLineWrap(true);   // 自动换行
 
         // 设置开始按钮
         btnStart.setBounds(750, 420, 80, 40);
@@ -77,10 +106,22 @@ public class MyFrame extends JFrame {
         MyMouseListener myMouseListener = new MyMouseListener();
         btnStart.addMouseListener(myMouseListener);
 
+        JScrollPane jsp=new JScrollPane(resultArea);
+        resultArea.setText("试一试能");
+        Dimension size2=resultArea.getPreferredSize();
+        //jsp.setLayout(null);
+        jsp.setBounds(80,80,320,180); // 这个滑动框要有多行才能实现
+
+        root.add(resultLabel);
+        root.add(jsp);
+        //root.add(resultArea);
         root.add(verLabel);
         root.add(edgeLabel);
+        root.add(edgeDataLabel);
         root.add(verTextField);
         root.add(edgeTextField);
+        root.add(vertexsLabel);
+        root.add(vertexsTextFiled);
         root.add(btnStart);
         //jScrollPane = new JScrollPane(edgeDataArea); // 文本域
         //root.add(jScrollPane);
@@ -103,41 +144,30 @@ public class MyFrame extends JFrame {
             g2.drawLine(700, 0, 700, 800);
             g2.drawLine(0, 400, 1000, 400);
             super.paintComponents(g);
-
         }
     }
 
     class MyMouseListener implements MouseListener {
-
         @Override
         public void mouseClicked(MouseEvent e) {
             System.out.println(e);
             START = true;
-            System.out.println("开始标志 : " + START);
+            Main.mainOk = true;
+            System.out.println("开始标志 : " + Main.mainOk);
             System.out.println("鼠标获取的顶点 : " + strVerNum);
             System.out.println("鼠标获取的边数 : " + strEdgeNum);
+            System.out.println("鼠标获取的顶点 : " + strVertexs);
             System.out.println("鼠标获取的图关系 : " + edgeDataArea.getText());
+            strEdgeData = new String(edgeDataArea.getText());
         }
-
         @Override
-        public void mousePressed(MouseEvent e) {
-
-        }
-
+        public void mousePressed(MouseEvent e) {}
         @Override
-        public void mouseReleased(MouseEvent e) {
-
-        }
-
+        public void mouseReleased(MouseEvent e) {}
         @Override
-        public void mouseEntered(MouseEvent e) {
-
-        }
-
+        public void mouseEntered(MouseEvent e) {}
         @Override
-        public void mouseExited(MouseEvent e) {
-
-        }
+        public void mouseExited(MouseEvent e) {}
     }
 
 

@@ -1,7 +1,6 @@
 package tu;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -25,19 +24,43 @@ public class JMenuDemo extends JMenuBar {
         JMenu menu=new JMenu("算法");
         menu.setMnemonic(KeyEvent.VK_F);    //设置快速访问符
 
-        JMenuItem item=new JMenuItem("最小生成树(N)",KeyEvent.VK_N);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,ActionEvent.CTRL_MASK));
-        menu.add(item);
+        JMenuItem item1=new JMenuItem("最小生成树(N)",KeyEvent.VK_N);
+        item1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,ActionEvent.CTRL_MASK));
+        menu.add(item1);
 
-        item=new JMenuItem("最短路径(O)",KeyEvent.VK_O);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,ActionEvent.CTRL_MASK));
-        menu.add(item);
+        JMenuItem item2=new JMenuItem("最短路径(O)",KeyEvent.VK_O);
+        item2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,ActionEvent.CTRL_MASK));
+        menu.add(item2);
 
-        item=new JMenuItem("最大匹配(S)",KeyEvent.VK_S);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK));
-        menu.add(item);
+        JMenuItem item3=new JMenuItem("最大匹配(S)",KeyEvent.VK_S);
+        item3.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK));
+        menu.add(item3);
         menu.addSeparator();
 
+        // 添加响应事件
+        item1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("菜单栏 " + e.getActionCommand());
+                MyFrame.algoType = 1;
+            }
+        });
+
+        item2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("菜单栏 " + e.getActionCommand());
+                MyFrame.algoType = 2;
+            }
+        });
+
+        item3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("菜单栏 " + e.getActionCommand());
+                MyFrame.algoType = 3;
+            }
+        });
         return menu;
     }
 }

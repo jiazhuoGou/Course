@@ -17,10 +17,12 @@ public class MyFrame extends JFrame {
     public JLabel vertexsLabel = new JLabel("顶点集合", JLabel.CENTER);
     public JLabel edgeDataLabel = new JLabel("关系集合", JLabel.CENTER);
     public JLabel resultLabel = new JLabel("结果", JLabel.CENTER);
-    public JTextArea resultArea = new JTextArea();
+    public JLabel srcLabel = new JLabel("最短路径源点", JLabel.CENTER);
+    public static JTextArea resultArea = new JTextArea();
     public JTextField vertexsTextFiled = new JTextField();
     public JTextField verTextField = new JTextField();
     public JTextField edgeTextField = new JTextField();
+    public JTextField srcTextField = new JTextField();
     public JButton btnStart = new JButton("开始");
     public JTextArea edgeDataArea = new JTextArea();
     public JPanel root = new MyPane();
@@ -32,11 +34,12 @@ public class MyFrame extends JFrame {
     public static volatile String strEdgeData;      // 关系集合
     public static volatile boolean START = false;   // 开始标志
     public static volatile int algoType;            // 算法标志，1最小生成树,2最短路径,3最大匹配
+    public static volatile String strSrc;           // 最短路径源点
 
 
     public MyFrame() {
 
-        jFrame.setSize(1000, 600);
+        jFrame.setSize(1000, 520);
 
         // 设置工具栏
         jFrame.setJMenuBar(new JMenuDemo());
@@ -92,27 +95,42 @@ public class MyFrame extends JFrame {
             @Override
             public void caretPositionChanged(InputMethodEvent event) {}
         });
+        JScrollPane jsp = new JScrollPane(edgeDataArea);
+        jsp.setBounds(740, 190, 170, 80);
+
+        // 设置最短路径源点
+        srcLabel.setFont(font);
+        srcLabel.setVerticalTextPosition(JLabel.TOP);
+        srcLabel.setBounds(744, 250, 170, 80);
+        srcTextField.setBounds(740, 305, 170, 20);
+        srcTextField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                strSrc = new String(e.getActionCommand());
+                System.out.println("最短路径源点 : " + strSrc);
+            }
+        });
 
         // 设置结果展示
         resultLabel.setFont(font);
         resultLabel.setVerticalTextPosition(JLabel.TOP);
-        resultLabel.setBounds(30, 0, 80, 80);
+        resultLabel.setBounds(70, 38, 60, 60);
         resultArea.setBounds(50, 50, 300, 150);
         resultArea.setLineWrap(true);   // 自动换行
+        JScrollPane jsp2=new JScrollPane(resultArea);
+        //jsp.setLayout(null);
+        jsp2.setBounds(80,80,320,180); // 这个滑动框要有多行才能实现
 
         // 设置开始按钮
-        btnStart.setBounds(750, 420, 80, 40);
+        btnStart.setBounds(780, 350, 80, 40);
         btnStart.setFont(font);
         MyMouseListener myMouseListener = new MyMouseListener();
         btnStart.addMouseListener(myMouseListener);
 
-        JScrollPane jsp=new JScrollPane(resultArea);
-        resultArea.setText("试一试能");
-        Dimension size2=resultArea.getPreferredSize();
-        //jsp.setLayout(null);
-        jsp.setBounds(80,80,320,180); // 这个滑动框要有多行才能实现
-
+        root.add(srcLabel);
+        root.add(srcTextField);
         root.add(resultLabel);
+        root.add(jsp2);
         root.add(jsp);
         //root.add(resultArea);
         root.add(verLabel);
@@ -123,9 +141,7 @@ public class MyFrame extends JFrame {
         root.add(vertexsLabel);
         root.add(vertexsTextFiled);
         root.add(btnStart);
-        //jScrollPane = new JScrollPane(edgeDataArea); // 文本域
-        //root.add(jScrollPane);
-        root.add(edgeDataArea);
+        //root.add(edgeDataArea);
         root.setLayout(null); // 解除默认布局，这样组件才能设置位置
 
         // 添加面板
@@ -142,7 +158,7 @@ public class MyFrame extends JFrame {
             Graphics2D g2 = (Graphics2D) g;
             g2.setStroke(new BasicStroke(1.5f));
             g2.drawLine(700, 0, 700, 800);
-            g2.drawLine(0, 400, 1000, 400);
+            //g2.drawLine(0, 400, 1000, 400);
             super.paintComponents(g);
         }
     }
@@ -153,11 +169,13 @@ public class MyFrame extends JFrame {
             System.out.println(e);
             START = true;
             Main.mainOk = true;
+            resultArea.setText("");
             System.out.println("开始标志 : " + Main.mainOk);
             System.out.println("鼠标获取的顶点 : " + strVerNum);
             System.out.println("鼠标获取的边数 : " + strEdgeNum);
             System.out.println("鼠标获取的顶点 : " + strVertexs);
             System.out.println("鼠标获取的图关系 : " + edgeDataArea.getText());
+            System.out.println("鼠标获取的图关系 : " + srcTextField.getText());
             strEdgeData = new String(edgeDataArea.getText());
         }
         @Override
@@ -170,5 +188,9 @@ public class MyFrame extends JFrame {
         public void mouseExited(MouseEvent e) {}
     }
 
-
+    // 设置结果文本域的内容
+    public static void setResultArea(String res)
+    {
+        resultArea.setText(res);
+    }
 }

@@ -51,13 +51,15 @@ public class Graph {
         String str;
         for (int i = 0; i < size2; i++) { // 这里要注意权重是双数的时候，需要截取字串
             str = data.get(i);
-            String tmpStr = str.substring(2); // 截取后面的数字
-            tmpStr = tmpStr.replace(" ", ""); // 要清除掉空格
+            System.out.print("边关系列表每一项 : " + str);
+            String tmpStr = str.replace(" ", ""); // 要清除掉空格
+            tmpStr = tmpStr.replace("\n", ""); // 最后一项不是空格是换行
+            tmpStr = tmpStr.substring(2); // 截取后面的数字
+            System.out.println(" 每一项截取到的数字 : " + tmpStr);
             char[] c = str.toCharArray();
             int m = vertex.indexOf(c[0]);
             int n = vertex.indexOf(c[1]);
             edge[m][n] = Integer.parseInt(tmpStr);
-            System.out.println(edge[m][n]);
             edge[n][m] = edge[m][n];
             // vertex.indexOf(str[0]);
         }
@@ -92,7 +94,6 @@ public class Graph {
         }
         System.out.println("二部图新的关系矩阵 " );
         show(newEdge, uN);
-
     }
 
     public void show(int[][] arr, int size) {
@@ -163,7 +164,15 @@ public class Graph {
         parent[1][0] = vertex[0];
         System.out.println("最小生成树的关系：");
         show(parent, 2);
+        // 结果展示
+        String res = new String("最小生成树权值总和 : " + MST);
+        res += "\n" + "各节点前驱关系 : " + "\n";
+        for (int i = 0; i < sizeVertex; i++) {
+            res += parent[0][i] + " <- " + parent[1][i] + "\n";
+        }
+        MyFrame.setResultArea(res);
     }
+
 
     // 输入起点，它会打印对图中所有点的路劲
     public void dijstra(char src) {
@@ -247,24 +256,47 @@ public class Graph {
             }
         }
         System.out.println();
+        // 这是内容展示
+        String res = "最短路径展示如下 : " + "\n";
+        for (int i = 0; i < sizeVertex; i++) {
+            if (vertex[i] != src) { // 如果该点不是源点
+                if (shortest[i] == MAX) {
+                    res += src + "到" + vertex[i] + "不可达";
+                    res += "\n";
+                } else {
+                    res += src + "到" + vertex[i] + "最短路径: " + path[i] + " 长度 : " + shortest[i];
+                    res += "\n";
+                }
+            }
+        }
+        MyFrame.setResultArea(res);
     }
 
     public int maximumMatching() {
         System.out.println();
         System.out.println("-----------最大匹配算法--------------");
         // 男上女下
-        int res = 0; // 最大匹配数
+        int sum = 0; // 最大匹配数
         for (int u = 0; u < uN; u++) {
             // 初始化，对某个男生来说，他们可能都名花无主
             Arrays.fill(used, false);
             if (find(u)) {
-                res++; // 配对了就+1
+                sum++; // 配对了就+1
             }
         }
-        System.out.println("最大匹配的值 : " + res);
+        System.out.println("最大匹配的值 : " + sum);
         System.out.println("最大匹配方案 : ");
         System.out.println(Arrays.toString(link));
-        return res;
+        // 设置展示内容
+        String res = new String("最大匹配的值 : " + sum + "\n");
+        res += "最大匹配方案 : " + "\n";
+        for (int i = 0; i < link.length; i++) {
+            if (link[i] != -1) { // 它是针对下部分的点来说的
+                res += vertex[vN + i] + " <--> " + vertex[link[i]] + "\n";
+            }
+        }
+        MyFrame.setResultArea(res);
+        return sum;
     }
 
     // 都是用下标存储

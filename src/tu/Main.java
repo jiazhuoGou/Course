@@ -45,13 +45,12 @@ public class Main {
             System.out.println("当前的算法选择 ： " + MyFrame.algoType);
             switch (MyFrame.algoType) {
                 case 1: g.prim();break;
-                case 2: g.dijstra('a');break;
+                case 2: g.dijstra(MyFrame.strSrc.toCharArray()[0]);break;
                 case 3: g.maximumMatching();break;
                 default:break;
             }
             MyFrame.START = false; // 继续阻塞然后一直循环
             data.clear();  // 清楚掉关系缓存
-
         }
     }
 

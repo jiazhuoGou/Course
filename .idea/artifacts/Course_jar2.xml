@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Course:jar2">
+    <output-path>$PROJECT_DIR$/out/artifacts/Course_jar2</output-path>
+    <root id="archive" name="Course.jar">
+      <element id="module-output" name="Course" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../beautyeye-3.7/dist/beautyeye_lnf.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
